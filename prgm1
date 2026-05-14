@@ -1,12 +1,157 @@
-helloooooo
-sfasfa
-fbaefaeo
-yrts
-hiii
-fsgrsdgrg
-good
-good morning
-hhhh
-uu
-uyuyuy
-rfger
+Step 1: Create Maven Project
+Open terminal:
+mkdir exp8
+cd exp8
+
+Create Maven project:
+mvn archetype:generate -DgroupId=com.example -DartifactId=jenkins-maven-app -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+
+Go to project folder:
+cd jenkins-maven-app
+
+Step 2: Initialize Git and Push to GitHub
+
+Initialize Git:
+git init
+git add .
+git commit -m "Maven Project"
+
+Create GitHub repository:
+jenkins-maven-app
+Add remote repository:
+git remote add origin https://github.com/Nagashreemurthy21/jenkins-maven-app.git
+
+Push project:
+git branch -M main
+git push -u origin main
+
+Step 3: Install and Configure Jenkins
+
+Open Jenkins:
+http://localhost:8080
+Install plugins:
+Maven Integration
+Git
+Ansible
+Manage Jenkins → Tools
+
+Step 6: Create Jenkins Job
+clean compile test package
+Step 10: Add Build Step 2
+Add build step
+Execute Windows batch command
+java -cp target/jenkins-maven-app-1.0-SNAPSHOT.jar com.example.App
+Step 11: Archive Artifact
+
+Under Post-build Actions:
+Add post-build action
+Archive the artifacts
+target/*.jar
+```
+
+Step 12: Build the Project
+
+Step 13: Create Ansible Inventory
+
+cd /mnt/c/jenkins-projects/jenkins-maven-app
+
+Create inventory file:
+vi inventory.ini
+Add:
+
+[local]
+localhost ansible_connection=local
+Step 14: Test Connectivity
+ansible -i inventory.ini local -m ping
+
+Step 15: Create Deployment Playbook
+
+vi deploy.yml
+---
+- hosts: local
+  become: yes
+
+  tasks:
+
+    - name: Create deployment folder
+      file:
+        path: /root/deployment
+        state: directory
+
+    - name: Copy jar file
+      copy:
+        src: target/jenkins-maven-app-1.0-SNAPSHOT.jar
+        dest: /root/deployment/
+```
+
+Save:
+Step 16: Run Playbook
+ansible-playbook -i inventory.ini deploy.yml --ask-become-pass
+
+Deployment successful.
+
+Verify:
+sudo ls /root/deployment
+
+Output:
+jenkins-maven-app-1.0-SNAPSHOT.jar
+Step 17: Resolve Manifest Error
+
+Open:
+vi pom.xml
+```
+Add before `</project>`:
+
+```xml
+<build>
+  <plugins>
+
+    <plugin>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.1.0</version>
+
+      <configuration>
+        <archive>
+          <manifest>
+            <addClasspath>true</addClasspath>
+            <mainClass>com.example.App</mainClass>
+          </manifest>
+        </archive>
+      </configuration>
+
+    </plugin>
+
+  </plugins>
+</build>
+```
+
+Save file.
+
+Step 18: Push Changes
+
+```bash
+git add pom.xml
+git commit -m "Fix manifest error"
+git push
+```
+
+Step 19: Rebuild in Jenkins
+
+Click:
+
+```text
+Build Now
+```
+
+Run jar:
+
+```bash
+java -jar target/jenkins-maven-app-1.0-SNAPSHOT.jar
+```
+
+Output:
+
+```text
+Hello World!
+```
+
